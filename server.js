@@ -1,11 +1,22 @@
 const express = require('express');
 const { animals } = require('./data/animals');
+const fs = require('fs');
+const path = require('path');
 
 
 const PORT = process.env.PORT || 3001;
 // instantiate the server
 const app = express();
 
+// This is a method executed by our Express.js server that mounts a function to the server that our requests will pass through before getting to the intended endpoint.
+
+// this code takes incoming POST data and converts it to key/value pairings that can be accessed in the req.body object
+// The extended: true option set inside the method call informs our server that there may be sub-array data nested in it as well, so it needs to look as deep into the POST data as possible to parse all of the data correctly.
+app.use(express.urlencoded({ extended: true }));
+
+// parse incoming JSON data
+// The express.json() method we used takes incoming POST data in the form of JSON and parses it into the req.body JavaScript object.
+app.use(express.json());
 
 
 
@@ -17,6 +28,7 @@ const app = express();
 
 
 
+// GET functions
 function filterByQuery(query, animalsArray) {
   let personalityTraitsArray = [];
   // Note that we save the animalsArray as filteredResults here:
@@ -56,10 +68,40 @@ function filterByQuery(query, animalsArray) {
   return filteredResults;
 }
 
-
 function findById(id, animalsArray) {
   const result = animalsArray.filter(animal => animal.id === id)[0];
   return result;
+}
+
+
+// POST functions
+function createNewAnimal(body, animalsArray) {
+  const animal = body;
+  animalsArray.push(animal);
+  fs.writeFileSync(
+    path.join(__dirname, './data/animals.json'),
+    JSON.stringify({ animals: animalsArray }, null, 2)
+  );
+
+  //return finished code to post route for response
+  return animal;
+}
+
+// add validation
+function validateAnimal(animal) {
+  if (!animal.name || typeof animal.name !== 'string') {
+    return false;
+  }
+  if (!animal.species || typeof animal.species !== 'string') {
+    return false;
+  }
+  if (!animal.diet || typeof animal.diet !== 'string') {
+    return false;
+  }
+  if (!animal.personalityTraits || !Array.isArray(animal.personalityTraits)) {
+    return false;
+  }
+  return true;
 }
 
 
@@ -83,6 +125,22 @@ app.get('/api/animals/:id', (req, res) => {
     res.send(404);
   }
 });
+
+// define a route that listens for POST requests
+// post requests represent the action of a client requesting the server to accept data rather than vice versa.
+app.post('/api/animals', (req, res) => {
+  // set id based on what the next index of the arraywill be
+  req.body.id = animals.length.toString();
+
+  // if any data in req.body is incorrect, send 400 error back
+  if (!validateAnimal(req.body)) {
+    res.status(400).send('The animal is not properly formatted.');
+  } else {
+  // add animal to json file and animals array in this function
+  const animal = createNewAnimal(req.body, animals);
+  res.json(req.body);
+  }
+})
 
 
 // chain the listen() method onto the server
