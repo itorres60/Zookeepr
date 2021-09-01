@@ -144,6 +144,17 @@
         "hungry"
       ],
       "id": "14"
+    },
+    {
+      "name": "Isaias",
+      "species": "This",
+      "diet": "herbivore",
+      "personalityTraits": [
+        "zany",
+        "anxious",
+        "loving"
+      ],
+      "id": "15"
     }
   ]
 }

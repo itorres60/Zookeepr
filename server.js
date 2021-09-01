@@ -18,6 +18,9 @@ app.use(express.urlencoded({ extended: true }));
 // The express.json() method we used takes incoming POST data in the form of JSON and parses it into the req.body JavaScript object.
 app.use(express.json());
 
+// we provide a file path to a location in our application (in this case, the public folder) and instruct the server to make these files static resources. This means that all of our front-end code can now be accessed without having a specific server endpoint created for it!
+app.use(express.static('public'));
+
 
 
 
@@ -140,7 +143,25 @@ app.post('/api/animals', (req, res) => {
   const animal = createNewAnimal(req.body, animals);
   res.json(req.body);
   }
-})
+});
+
+// We can assume that a route that has the term api in it will deal in transference of JSON data, whereas a more normal-looking endpoint such as /animals should serve an HTML page.
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+app.get('/animals', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+app.get('/zookeepers', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
 
 
 // chain the listen() method onto the server
