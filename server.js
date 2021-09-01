@@ -67,6 +67,7 @@ function findById(id, animalsArray) {
 //get requires two arguements: a string describing the route the client will have to fetch from.  The second is a callback function that will execute everytime that route is accessed with a GET request.
 app.get('/api/animals', (req, res) => {
   let results = animals;
+  //remember that queries are denoted by "?"
   if (req.query) {
     results = filterByQuery(req.query, results);
   }
